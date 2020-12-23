@@ -1,0 +1,116 @@
+<script>
+
+//Create Record
+    $("#btnsave").click(function(){
+        let id= $("#stuid").val(); 
+        let nm =  $("#nameid").val();
+        let em =  $("#emailid").val();
+        let pass =  $("#passwordid").val();
+        // GO to source code of webpage and get value of  "csrfmiddlewaretoken"  from hidden input 
+        let csr = $("input[name=csrfmiddlewaretoken]").val();
+
+        if(nm == "" || em == "" || pass == ""){
+            $("#msz").text("Please fill all the fields");
+            $("#msz").show(); 
+        }else{
+            mydata = {sid:id,name:nm, email:em, password:pass, csrfmiddlewaretoken:csr};
+          
+            $.ajax({
+                url:"{% url 'save' %}",
+                method:"POST",
+                data:mydata,
+                dataType:"json",
+                success:function(data){
+
+                    if(data.status=="1"){
+                        $("#msz").text("Data submitted successfully");
+                        $("#msz").show();
+                        console.log(data.student_data);
+                        output ="";
+                        $("#stuid").val("");
+
+                        // Clear all the fields of first form 
+                        x=data.student_data
+                        for(i=0;i<x.length;i++){
+                            output +="<tr><td>"+x[i].id+"</td><td>"+x[i].name+"</td><td>"+x[i].email+"</td><td>"+x[i].password+"</td><td><input class='btn btn-warning btn-sm btn-edit' type='button' value='Edit' data-sid="+x[i].id+"> <input class='btn btn-danger btn-sm btn-del' type='button' value='Delete' data-sid="+x[i].id+"></td></tr>";
+                        }
+
+                        $("#tbody").html(output);
+
+                        $("form")[0].reset();
+
+                    }else{
+                        $("#msz").text("Something went wrong");
+                        $("#msz").show();
+
+                    }
+                }
+            });
+            
+        }
+    });
+
+// Delete Record
+
+    $("#tbody").on("click",".btn-del",function(){
+        $("#msz").hide()
+        let sid=$(this).attr("data-sid");
+        console.log(sid);
+
+        let csr = $("input[name=csrfmiddlewaretoken]").val();
+        mydata={id:sid, csrfmiddlewaretoken:csr};
+        mythis= this;
+        $.ajax({
+            url:"{% url 'delete_record' %}",
+            method:"POST",
+            data:mydata,
+            dataType:"json",
+            success:function(data){
+                if(data.status=="1"){
+                    $("#msz").text("Record deleted successfully");
+                    $("#msz").show();                    // To remove clicked row with animation
+                    $(mythis).closest("tr").fadeOut();
+                    // Else if you want to inflate all the data again
+                    /*output ="";
+                    x=data.student_data
+                    for(i=0;i<x.length;i++){
+                        output +="<tr><td>"+x[i].id+"</td><td>"+x[i].name+"</td><td>"+x[i].email+"</td><td>"+x[i].password+"</td><td><input class='btn btn-warning btn-sm' type='button' value='Edit' data-sid="+x[i].id+"/> <input class='btn btn-danger btn-sm' type='button' value='Delete' data-sid="+x[i].id+"/></td></tr>";
+                    }
+                    $("#tbody").html(output);
+
+                    */
+
+                }else{
+                    $("#msz").text("Record Delete unsuccessfull");
+                    $("#msz").show();                 }
+            }
+        });
+    });
+
+// Update Record
+    $("#tbody").on("click",".btn-edit",function(){
+        $("#msz").hide()
+
+        let sid=$(this).attr("data-sid");
+        console.log(sid);
+
+        let csr = $("input[name=csrfmiddlewaretoken]").val();
+        mydata={id:sid, csrfmiddlewaretoken:csr};
+        $.ajax({
+            url:"{% url 'edit' %}",
+            method:"POST",
+            data:mydata,
+            dataType:"json",
+            success:function(data){
+                $("#stuid").val(data.id);
+                $("#nameid").val(data.name);
+                $("#emailid").val(data.email);
+                $("#passwordid").val(data.password);
+                console.log(data)
+            }
+        });
+    });
+
+
+
+</script>
