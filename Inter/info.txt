@@ -1,0 +1,6 @@
+This was a practice program to understand
+-Ajax
+-jQuery
+-Django Forms
+
+Main purpose of this program is to implement CRUD functionality and updating different part of webpage without reloadin the page.
